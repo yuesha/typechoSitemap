@@ -47,7 +47,7 @@ class Sitemap_Action extends Typecho_Widget implements Widget_Interface_Do
 	 */
 	public function levelSiteList()
 	{
-		$xmlhtml = "<url><loc> " . $this->siteUrl . "</loc><lastmod> " . $this->ymd . " </lastmod><changefreq> daily </changefreq><priority> 1.0 </priority></url>";
+		$xmlhtml = "<url><loc>" . $this->siteUrl . "</loc><lastmod>" . $this->ymd . "</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>";
 		// 分类
 		$xmlhtml = $this->retCate(true);
 		// 单页
@@ -55,7 +55,7 @@ class Sitemap_Action extends Typecho_Widget implements Widget_Interface_Do
 			$obj = $this->widget('Widget_Contents_Page_List');
 			if ($obj->have()) {
 				while ($obj->next()) {
-					$xmlhtml .= "<url><loc> " . $obj->permalink . "</loc><lastmod> " . $this->ymd . " </lastmod><changefreq> " . $this->Sitemap->pagesChangefreq . " </changefreq><priority> " . $this->Sitemap->pagesPriority . " </priority></url>";
+					$xmlhtml .= "<url><loc>" . $obj->permalink . "</loc><lastmod>" . $this->ymd . "</lastmod><changefreq>" . $this->Sitemap->pagesChangefreq . "</changefreq><priority>" . $this->Sitemap->pagesPriority . "</priority></url>";
 				}
 			}
 		}
@@ -169,7 +169,7 @@ class Sitemap_Action extends Typecho_Widget implements Widget_Interface_Do
 					if ($ret === 'html') {
 						$html .= '<li><a href="' . $obj->permalink . '">' . $obj->name . '</a></li>';
 					} else {
-						$xmlhtml .= "<url><loc> " . $obj->permalink . "</loc><lastmod> " . $this->ymd . " </lastmod><changefreq> " . $this->Sitemap->cateChangefreq . " </changefreq><priority> " . $this->Sitemap->catePriority . " </priority></url>";
+						$xmlhtml .= "<url><loc>" . $obj->permalink . "</loc><lastmod>" . $this->ymd . "</lastmod><changefreq>" . $this->Sitemap->cateChangefreq . "</changefreq><priority>" . $this->Sitemap->catePriority . "</priority></url>";
 					}
 				}
 			}
@@ -200,7 +200,7 @@ class Sitemap_Action extends Typecho_Widget implements Widget_Interface_Do
 		// 效验
 		$this->checkData($data);
 		for ($i = 0; $i < count($data); $i++) {
-			$xmlhtml .= "<url><loc> " . $data[$i] . "</loc><lastmod> " . $this->ymd . " </lastmod><changefreq> " . $this->Sitemap->pagesChangefreq . " </changefreq><priority> " . $this->Sitemap->pagesPriority . " </priority></url>";
+			$xmlhtml .= "<url><loc>" . $data[$i] . "</loc><lastmod>" . $this->ymd . "</lastmod><changefreq>" . $this->Sitemap->pagesChangefreq . "</changefreq><priority>" . $this->Sitemap->pagesPriority . "</priority></url>";
 		}
 		$this->showXml($xmlhtml);
 	}
@@ -231,11 +231,11 @@ class Sitemap_Action extends Typecho_Widget implements Widget_Interface_Do
 				}
 			}
 		}
-		$xmlhtml = "<url><loc> " . $data['permalink'] . "</loc><lastmod> " . $this->ymd . " </lastmod><changefreq> " . $this->Sitemap->cateChangefreq . " </changefreq><priority> " . $this->Sitemap->catePriority . " </priority></url>";
+		$xmlhtml = "<url><loc>" . $data['permalink'] . "</loc><lastmod>" . $this->ymd . "</lastmod><changefreq>" . $this->Sitemap->cateChangefreq . "</changefreq><priority>" . $this->Sitemap->catePriority . "</priority></url>";
 		// 分页
 		$count = ceil($count / $this->pageSize);
 		for ($i = 1; $i < $count; $i++) {
-			$xmlhtml .= "<url><loc> " . $data['permalink'] . $i . "/</loc><lastmod> " . $this->ymd . " </lastmod><changefreq> " . $this->Sitemap->CatePageChangefreq . " </changefreq><priority> " . $this->Sitemap->CatePagePriority . " </priority></url>";
+			$xmlhtml .= "<url><loc>" . $data['permalink'] . $i . "/</loc><lastmod> " . $this->ymd . "</lastmod><changefreq> " . $this->Sitemap->CatePageChangefreq . "</changefreq><priority>" . $this->Sitemap->CatePagePriority . "</priority></url>";
 		}
 		$this->showXml($xmlhtml);
 	}
@@ -254,7 +254,7 @@ class Sitemap_Action extends Typecho_Widget implements Widget_Interface_Do
 		$xmlhtml = '';
 		$priority = $this->Sitemap->HomePagePriority;
 		for ($i = 1; $i < $pages; $i++) {
-			$xmlhtml .= "<url><loc> " . $this->siteUrl . "/" . "page/" . $i . "/</loc><lastmod> " . $this->ymd . " </lastmod><changefreq> " . $this->Sitemap->HomePageChangefreq . " </changefreq><priority> " . $priority . " </priority></url>";
+			$xmlhtml .= "<url><loc>" . $this->siteUrl . "/" . "page/" . $i . "/</loc><lastmod>" . $this->ymd . "</lastmod><changefreq>" . $this->Sitemap->HomePageChangefreq . "</changefreq><priority>" . $priority . "</priority></url>";
 		}
 		if ($ret) {
 			return $xmlhtml;
@@ -291,7 +291,7 @@ class Sitemap_Action extends Typecho_Widget implements Widget_Interface_Do
 			$tags[$i]['slug'] = urlencode($tags[$i]['slug']);
 			$pathinfo = $routeExists ? Typecho_Router::url($type, $tags[$i]) : '#';
 			$permalink = Typecho_Common::url($pathinfo, $this->Options->index);
-			$xmlhtml .= "<url><loc> " . $permalink . "</loc><lastmod> " . $this->ymd . " </lastmod><changefreq> " . $this->Sitemap->tagChangefreq . " </changefreq><priority> " . $this->Sitemap->tagPriority . " </priority></url>";
+			$xmlhtml .= "<url><loc>" . $permalink . "</loc><lastmod>" . $this->ymd . "</lastmod><changefreq>" . $this->Sitemap->tagChangefreq . "</changefreq><priority>" . $this->Sitemap->tagPriority . "</priority></url>";
 		}
 		if ($ret) {
 			return $xmlhtml;
@@ -328,7 +328,7 @@ class Sitemap_Action extends Typecho_Widget implements Widget_Interface_Do
 			$tags[$i]['keywords'] = urlencode($tags[$i]['slug']);
 			$pathinfo = $routeExists ? Typecho_Router::url($type, $tags[$i]) : '#';
 			$permalink = Typecho_Common::url($pathinfo, $this->Options->index);
-			$xmlhtml .= "<url><loc> " . $permalink . "</loc><lastmod> " . $this->ymd . " </lastmod><changefreq> " . $this->Sitemap->searchChangefreq . " </changefreq><priority> " . $this->Sitemap->searchPriority . " </priority></url>";
+			$xmlhtml .= "<url><loc>" . $permalink . "</loc><lastmod>" . $this->ymd . "</lastmod><changefreq>" . $this->Sitemap->searchChangefreq . "</changefreq><priority>" . $this->Sitemap->searchPriority . "</priority></url>";
 		}
 		if ($ret) {
 			return $xmlhtml;
@@ -362,7 +362,7 @@ class Sitemap_Action extends Typecho_Widget implements Widget_Interface_Do
 			$isHidden = Sitemap_Plugin::checkIsHiddenCate(array_column($content->categories, 'mid'));
 			if ($isHidden) continue;
 
-			$xmlhtml .= "<url><loc> " . $content->permalink . "</loc><lastmod> " . date('Y-m-d', $content->created) . " </lastmod><changefreq> " . $this->Sitemap->postChangefreq . " </changefreq><priority> " . $priority . " </priority></url>";
+			$xmlhtml .= "<url><loc>" . $content->permalink . "</loc><lastmod>" . date('Y-m-d', $content->created) . "</lastmod><changefreq>" . $this->Sitemap->postChangefreq . "</changefreq><priority>" . $priority . "</priority></url>";
 
 		}
 		if ($ret) {
