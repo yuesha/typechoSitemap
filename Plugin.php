@@ -146,6 +146,8 @@ class Sitemap_Plugin implements Typecho_Plugin_Interface
 		header("refresh:0;url= " . $adminUrl);
 		// 提示框
 		Typecho_Widget::widget('Widget_Notice')->set(_t('文章 "<a href="%s">%s</a>" 已经发布 ' . $postMsg, $url, $widget->title), 'success');
+		// 必须die掉，不然提示框显示不出来
+		die();
 	}
 
 	// 检测文章所属分类列表当中 是否有 禁止主动推送分类
