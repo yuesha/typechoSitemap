@@ -153,10 +153,21 @@ class Sitemap_Plugin implements Typecho_Plugin_Interface
 	// 检测文章所属分类列表当中 是否有 禁止主动推送分类
 	public static function checkIsHiddenCate($postMids = [])
 	{
-		$mid = Typecho_Widget::widget('Sitemap_Action')->_ckmid();
-		if (!in_array($postMids[0], $mid)) return false;
+		// 文章没有选中任何分类
+		if (empty($postMids)) return false;
 
-		return true;
+		$disAllowMids = Typecho_Widget::widget('Sitemap_Action')->_ckmid();
+		// 没有配置 禁止主动推送分类
+		if (empty($disAllowMids)) return false;
+
+		// 检测文章所属分类列表是否都不在 禁止主动推送分类 里
+		foreach ($postMids as $postMid) {
+			if (!in_array((int)$postMid, $disAllowMids)) continue;
+
+			return true;
+		}
+
+		return false;
 	}
 
 	/**

@@ -349,18 +349,21 @@ class Sitemap_Action extends Typecho_Widget implements Widget_Interface_Do
 		$priority = $this->Sitemap->postPriority;
 		if ($ret === 'html') {
 			while ($content->next()) {
-				// 过滤隐藏分类
-				if (intval($this->mid[0]) != intval($content->categories[0]['mid'])) {
-					$reshtml .= '<li><a href="' . $content->permalink . '">' . $content->title . '</a></li>';
-				}
+				// 过滤不显示的文章分类
+				$isHidden = Sitemap_Plugin::checkIsHiddenCate(array_column($content->categories, 'mid'));
+				if ($isHidden) continue;
+
+				$reshtml .= '<li><a href="' . $content->permalink . '">' . $content->title . '</a></li>';
 			}
 			return $reshtml;
 		}
 		while ($content->next()) {
-			// 过滤隐藏分类
-			if (intval($this->mid[0]) != intval($content->categories[0]['mid'])) {
-				$xmlhtml .= "<url><loc> " . $content->permalink . "</loc><lastmod> " . date('Y-m-d', $content->created) . " </lastmod><changefreq> " . $this->Sitemap->postChangefreq . " </changefreq><priority> " . $priority . " </priority></url>";
-			}
+			// 过滤不显示的文章分类
+			$isHidden = Sitemap_Plugin::checkIsHiddenCate(array_column($content->categories, 'mid'));
+			if ($isHidden) continue;
+
+			$xmlhtml .= "<url><loc> " . $content->permalink . "</loc><lastmod> " . date('Y-m-d', $content->created) . " </lastmod><changefreq> " . $this->Sitemap->postChangefreq . " </changefreq><priority> " . $priority . " </priority></url>";
+
 		}
 		if ($ret) {
 			return $xmlhtml;
@@ -559,14 +562,17 @@ class Sitemap_Action extends Typecho_Widget implements Widget_Interface_Do
 	// 转换mid为数组
 	public function _ckmid()
 	{
-		$mid = [];
-		if ($this->Sitemap->mid) {
-			$mid = explode(',', $this->Sitemap->mid);
-			if (!is_array($mid)) {
-				$mid = [];
-			}
+		if (empty($this->Sitemap->mid)) return [];
+
+		$mid = explode(',', $this->Sitemap->mid);
+		if (!is_array($mid)) return [];
+
+		foreach ($mid as $k => $v) {
+			$mid[$k] = (int)$v;
+			if (empty($mid[$k])) unset($mid[$k]);
 		}
-		return $mid;
+
+		return array_values($mid);
 	}
 	// 隐藏指定分类下的所有文章
 	private function _setMiddata($content, $mid)
