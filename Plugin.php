@@ -76,6 +76,8 @@ class Sitemap_Plugin implements Typecho_Plugin_Interface
 		$apiPostToken = new Typecho_Widget_Helper_Form_Element_Text('apiPostToken', NULL, null, _t('API推送密钥'), _t('设置一个密钥，使用api推送时需携带，确保api安全调用。请勿外泄。<a target="_blank" href="https://Oct.cn/view/66#API主动推送">使用说明</a>'), ['class' => 'mini']);
 		$apiPostToken->input->setAttribute('class', 'mini');
 		$form->addInput($apiPostToken);
+		$featurePostPost =  new Typecho_Widget_Helper_Form_Element_Radio('featurePostPost', array('1' => _t('开启'), '0' => _t('关闭')), '0', _t('未来发布文章推送开关'), _t('开启后，如果相关文章无法访问的话，会影响整站收录效果'));
+		$form->addInput($featurePostPost);
 		// 隐藏的分类
 		$mid = new Typecho_Widget_Helper_Form_Element_Text('mid', NULL, null, _t('填写不显示的分类mid'), _t('多个请用英文逗号,隔开。如:1,2 设置后将不输出该分类下的文章。mid获取方式：点击分类->编辑->查看网址后面的mid数字'), ['class' => 'mini']);
 		$mid->input->setAttribute('class', 'mini');
@@ -119,6 +121,7 @@ class Sitemap_Plugin implements Typecho_Plugin_Interface
 	public static function personalConfig(Typecho_Widget_Helper_Form $form)
 	{
 	}
+
 	/**
 	 * 插件实现方法
 	 * 
@@ -127,24 +130,33 @@ class Sitemap_Plugin implements Typecho_Plugin_Interface
 	 */
 	public static function render($contents, $widget)
 	{
+		$url = $widget->permalink;
 		$options = Typecho_Widget::widget('Widget_Options');
-		$Sitemap = $options->Plugin('Sitemap');
-		/* 允许自动推送 */
-		if ($Sitemap->baiduPost == 1) {
-			$url = $widget->permalink;
-			$mid = Typecho_Widget::widget('Sitemap_Action')->_ckmid();
-			if (in_array($widget->categories[0]['mid'], $mid)) {
-				$postMsg = '该分类设置了隐藏,不主动推送';
-			} else {
-				$res = Typecho_Widget::widget('Sitemap_Action')->sendBaiduPost($url);
-				$postMsg = $res['msg'];
-			}
-			$adminUrl = Typecho_Common::url('manage-posts.php', $options->adminUrl);
-			header("refresh:0;url= " . $adminUrl);
-			Typecho_Widget::widget('Widget_Notice')->set(_t('文章 "<a href="%s">%s</a>" 已经发布 ' . $postMsg, $url, $widget->title), 'success');
-			die();
+
+		// 检测 是否允许推送
+		$postMsg = self::checkAllowPost($widget);
+		if (empty($postMsg)) {
+			// 推送百度
+			$res = Typecho_Widget::widget('Sitemap_Action')->sendBaiduPost($url);
+			$postMsg = $res['msg'];
 		}
+
+		// 跳转回文章列表
+		$adminUrl = Typecho_Common::url('manage-posts.php', $options->adminUrl);
+		header("refresh:0;url= " . $adminUrl);
+		// 提示框
+		Typecho_Widget::widget('Widget_Notice')->set(_t('文章 "<a href="%s">%s</a>" 已经发布 ' . $postMsg, $url, $widget->title), 'success');
 	}
+
+	// 检测文章所属分类列表当中 是否有 禁止主动推送分类
+	public static function checkIsHiddenCate($postMids = [])
+	{
+		$mid = Typecho_Widget::widget('Sitemap_Action')->_ckmid();
+		if (!in_array($postMids[0], $mid)) return false;
+
+		return true;
+	}
+
 	/**
 	 * 封装方法
 	 */
@@ -172,5 +184,26 @@ class Sitemap_Plugin implements Typecho_Plugin_Interface
 		$form->addInput($Select);
 		$Radio =  new Typecho_Widget_Helper_Form_Element_Radio($name . 'Priority', $p, $priority);
 		$form->addInput($Radio);
+	}
+
+	// 检测 是否允许推送
+	private static function checkAllowPost($widget)
+	{
+		$options = Typecho_Widget::widget('Widget_Options');
+		$Sitemap = $options->Plugin('Sitemap');
+		/* 允许自动推送 */
+		if ($Sitemap->baiduPost != 1) return '自动推送开关已关闭';
+
+		// 检测是否禁止主动推送分类
+		$isHiddenCate = self::checkIsHiddenCate(array_column($widget->categories, 'mid'));
+		if ($isHiddenCate) return '插件配置中禁止当前分类主动推送';
+
+		// 时间正常发布
+		if ($widget -> created <= time()) return ;
+
+		// 未来发布文章开关
+		if ($Sitemap->featurePostPost == 1) return ;
+
+		return '文章发布时间晚于当前时间，不主动推送';
 	}
 }
